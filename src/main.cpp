@@ -1,6 +1,6 @@
 #include <iostream>
 #include <SDL2/SDL.h>
-#include <OpenGL/gl.h>
+#include <glad/glad.h>
 
 int main()
 {
@@ -37,6 +37,12 @@ int main()
     return -1;
   }
   SDL_GL_SetSwapInterval(1);
+
+  if (!gladLoadGL())
+  {
+    std::cerr << "Failed to initialize GLAD!" << std::endl;
+    return -1;
+  }
 
   SDL_Event event;
   bool isRunning{true};

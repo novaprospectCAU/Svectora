@@ -25,7 +25,7 @@ find_library(OPENGL_LIBRARY OpenGL REQUIRED)
 target_link_libraries(app PRIVATE ${OPENGL_LIBRARY})
 
 # glad
-target_include_directories(app PRIVATE includes/glad)
+target_include_directories(app PRIVATE includes)
 
 # 컴파일 옵션 (공통)
 target_compile_options(app PRIVATE -Wall -Wextra -Wpedantic -Werror)
