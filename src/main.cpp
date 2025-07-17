@@ -73,7 +73,7 @@ int main()
   {
     char log[512];
     glGetShaderInfoLog(vertexShader, 512, nullptr, log);
-    std::cerr << "Failed to compile GLAD vertex shader!" << std::endl;
+    std::cerr << "Failed to compile GLAD vertex shader! : " << log << std::endl;
     glDeleteShader(vertexShader);
     return -1;
   }
@@ -102,7 +102,7 @@ int main()
   {
     char log[512];
     glGetShaderInfoLog(fragmentShader, 512, nullptr, log);
-    std::cerr << "Failed to compile GLAD fragment shader!" << std::endl;
+    std::cerr << "Failed to compile GLAD fragment shader!" << log << std::endl;
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
     return -1;
@@ -184,7 +184,8 @@ int main()
   }
 
   // ------------------------------------ Exit ------------------------------------
-
+  glDeleteVertexArrays(1, &VAO);
+  glDeleteBuffers(1, &VBO);
   glDeleteProgram(program);
   SDL_GL_DeleteContext(glContext);
   SDL_DestroyWindow(svectoraWindow);
