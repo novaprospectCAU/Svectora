@@ -9,6 +9,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # 소스 파일
 set(SOURCES
+    src/utils/readFile.cpp
     src/main.cpp
     includes/glad/glad.c
 )

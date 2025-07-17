@@ -1,6 +1,9 @@
 #include <iostream>
+#include <string>
 #include <SDL2/SDL.h>
 #include <glad/glad.h>
+
+#include "utils/readFile.h"
 
 int main()
 {
@@ -46,6 +49,112 @@ int main()
     return -1;
   }
 
+  auto vertexShader = glCreateShader(GL_VERTEX_SHADER);
+  if (!vertexShader)
+  {
+    std::cerr << "Failed to intialize GLAD vertex shader!" << std::endl;
+    return -1;
+  }
+  std::string vertexShaderSrc = readFile("../src/shaders/basic.vert");
+  if (vertexShaderSrc == "")
+  {
+    std::cerr << "Failed to read GLAD vertex shader file!" << std::endl;
+    glDeleteShader(vertexShader);
+    return -1;
+  }
+  const char *vSrc = vertexShaderSrc.c_str();
+
+  glShaderSource(vertexShader, 1, &vSrc, nullptr);
+  glCompileShader(vertexShader);
+
+  GLint success;
+  glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+  if (!success)
+  {
+    char log[512];
+    glGetShaderInfoLog(vertexShader, 512, nullptr, log);
+    std::cerr << "Failed to compile GLAD vertex shader!" << std::endl;
+    glDeleteShader(vertexShader);
+    return -1;
+  }
+
+  auto fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+  if (!fragmentShader)
+  {
+    std::cerr << "Failed to initialize GLAD fragment shader!" << std::endl;
+    return -1;
+  }
+
+  std::string fragmentShaderSrc = readFile("../src/shaders/basic.frag");
+  if (fragmentShaderSrc == "")
+  {
+    std::cerr << "failed to read GLAD fragment shader file!" << std::endl;
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+    return -1;
+  }
+  const char *fSrc = fragmentShaderSrc.c_str();
+  glShaderSource(fragmentShader, 1, &fSrc, nullptr);
+  glCompileShader(fragmentShader);
+
+  glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+  if (!success)
+  {
+    char log[512];
+    glGetShaderInfoLog(fragmentShader, 512, nullptr, log);
+    std::cerr << "Failed to compile GLAD fragment shader!" << std::endl;
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+    return -1;
+  }
+
+  auto program = glCreateProgram();
+  if (!program)
+  {
+    std::cerr << "Failed to initialize GLAD program!" << std::endl;
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+    return -1;
+  }
+
+  glAttachShader(program, vertexShader);
+  glAttachShader(program, fragmentShader);
+  glLinkProgram(program);
+
+  glDeleteShader(vertexShader);
+  glDeleteShader(fragmentShader);
+
+  glUseProgram(program);
+
+  // ------------------------------------ Event Init ------------------------------------
+  glEnable(GL_DEPTH_TEST);
+
+  float vertices[] = {
+      -0.2f,
+      -0.2f,
+      0.0f,
+      0.2f,
+      -0.2f,
+      0.0f,
+      -0.2f,
+      0.2f,
+      0.0f,
+  };
+
+  GLuint VBO, VAO;
+  glGenVertexArrays(1, &VAO);
+  glGenBuffers(1, &VBO);
+
+  glBindVertexArray(VAO);
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+  glEnableVertexAttribArray(0);
+
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
+
   // ------------------------------------ Event Loop ------------------------------------
   SDL_Event event;
   bool isRunning{true};
@@ -67,12 +176,16 @@ int main()
     }
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glBindVertexArray(VAO);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glBindVertexArray(0);
 
     SDL_GL_SwapWindow(svectoraWindow);
   }
 
   // ------------------------------------ Exit ------------------------------------
 
+  glDeleteProgram(program);
   SDL_GL_DeleteContext(glContext);
   SDL_DestroyWindow(svectoraWindow);
   SDL_Quit();
