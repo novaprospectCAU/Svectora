@@ -4,6 +4,7 @@
 
 int main()
 {
+  // ------------------------------------ SDL Setting ------------------------------------
   if (SDL_Init(SDL_INIT_VIDEO))
   {
     SDL_Log("Failed to initialize SDL : %s", SDL_GetError());
@@ -38,12 +39,14 @@ int main()
   }
   SDL_GL_SetSwapInterval(1);
 
+  // ------------------------------------ GLAD Setting ------------------------------------
   if (!gladLoadGL())
   {
     std::cerr << "Failed to initialize GLAD!" << std::endl;
     return -1;
   }
 
+  // ------------------------------------ Event Loop ------------------------------------
   SDL_Event event;
   bool isRunning{true};
   while (isRunning)
@@ -67,6 +70,8 @@ int main()
 
     SDL_GL_SwapWindow(svectoraWindow);
   }
+
+  // ------------------------------------ Exit ------------------------------------
 
   SDL_GL_DeleteContext(glContext);
   SDL_DestroyWindow(svectoraWindow);
