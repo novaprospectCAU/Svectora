@@ -28,6 +28,10 @@ target_link_libraries(app PRIVATE ${OPENGL_LIBRARY})
 # glad
 target_include_directories(app PRIVATE includes)
 
+# glm
+find_package(glm CONFIG REQUIRED)
+target_link_libraries(app PRIVATE glm::glm)
+
 # 컴파일 옵션 (공통)
 target_compile_options(app PRIVATE -Wall -Wextra -Wpedantic -Werror)
 

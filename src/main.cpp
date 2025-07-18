@@ -2,6 +2,9 @@
 #include <string>
 #include <SDL2/SDL.h>
 #include <glad/glad.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "utils/readFile.h"
 
@@ -27,7 +30,7 @@ int main()
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 
-  auto svectoraWindow = SDL_CreateWindow("Svectora", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 600, 500, SDL_WINDOW_OPENGL);
+  auto svectoraWindow = SDL_CreateWindow("Svectora", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 600, 600, SDL_WINDOW_OPENGL);
   if (!svectoraWindow)
   {
     SDL_Log("Failed to create window! : %s", SDL_GetError());
@@ -130,15 +133,59 @@ int main()
   glEnable(GL_DEPTH_TEST);
 
   float vertices[] = {
-      -0.2f,
-      -0.2f,
-      0.0f,
-      0.2f,
-      -0.2f,
-      0.0f,
-      -0.2f,
-      0.2f,
-      0.0f,
+      // 앞면 (z = 0.0)
+      -0.5f, -0.5f, 0.0f, // v0
+      -0.5f, 0.5f, 0.0f,  // v2
+      0.5f, -0.5f, 0.0f,  // v4
+
+      -0.5f, 0.5f, 0.0f, // v2
+      0.5f, 0.5f, 0.0f,  // v6
+      0.5f, -0.5f, 0.0f, // v4
+
+      // 뒷면 (z = -1.0)
+      0.5f, -0.5f, -1.0f,  // v5
+      0.5f, 0.5f, -1.0f,   // v7
+      -0.5f, -0.5f, -1.0f, // v1
+
+      0.5f, 0.5f, -1.0f,   // v7
+      -0.5f, 0.5f, -1.0f,  // v3
+      -0.5f, -0.5f, -1.0f, // v1
+
+      // 왼쪽면
+      -0.5f, -0.5f, -1.0f, // v1
+      -0.5f, 0.5f, -1.0f,  // v3
+      -0.5f, -0.5f, 0.0f,  // v0
+
+      -0.5f, 0.5f, -1.0f, // v3
+      -0.5f, 0.5f, 0.0f,  // v2
+      -0.5f, -0.5f, 0.0f, // v0
+
+      // 오른쪽면
+      0.5f, -0.5f, 0.0f,  // v4
+      0.5f, 0.5f, 0.0f,   // v6
+      0.5f, -0.5f, -1.0f, // v5
+
+      0.5f, 0.5f, 0.0f,   // v6
+      0.5f, 0.5f, -1.0f,  // v7
+      0.5f, -0.5f, -1.0f, // v5
+
+      // 윗면
+      -0.5f, 0.5f, 0.0f,  // v2
+      -0.5f, 0.5f, -1.0f, // v3
+      0.5f, 0.5f, 0.0f,   // v6
+
+      -0.5f, 0.5f, -1.0f, // v3
+      0.5f, 0.5f, -1.0f,  // v7
+      0.5f, 0.5f, 0.0f,   // v6
+
+      // 아랫면
+      -0.5f, -0.5f, -1.0f, // v1
+      -0.5f, -0.5f, 0.0f,  // v0
+      0.5f, -0.5f, -1.0f,  // v5
+
+      -0.5f, -0.5f, 0.0f, // v0
+      0.5f, -0.5f, 0.0f,  // v4
+      0.5f, -0.5f, -1.0f  // v5
   };
 
   GLuint VBO, VAO;
@@ -174,10 +221,30 @@ int main()
     {
       isRunning = false;
     }
+
+    float angle = (float)SDL_GetTicks() / 1000.0f;
+    std::cout << "angle : " << angle << '\n';
+
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(0, 0, -0.5f));
+    model = glm::rotate(model, angle, glm::vec3(1, 1, 0));
+    model = glm::translate(model, glm::vec3(0, 0, 0.5f));
+    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -2.0f));
+    glm::mat4 proj = glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 10.0f);
+
+    GLuint modelLoc = glGetUniformLocation(program, "uModel");
+    GLuint viewLoc = glGetUniformLocation(program, "uView");
+    GLuint projLoc = glGetUniformLocation(program, "uProj");
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
+
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+
     glBindVertexArray(0);
 
     SDL_GL_SwapWindow(svectoraWindow);
