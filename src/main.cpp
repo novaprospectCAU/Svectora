@@ -160,6 +160,11 @@ int main()
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 
+  // ------------------------------------ Event Variables ------------------------------------
+  float camera_dx = 0.0f;
+  // float camera_dy = 0.0f;
+  float camera_dz = -2.0f;
+
   // ------------------------------------ Event Loop ------------------------------------
   SDL_Event event;
   bool isRunning{true};
@@ -172,6 +177,23 @@ int main()
       case SDL_QUIT:
         isRunning = false;
         break;
+
+      case SDL_KEYDOWN:
+        switch (event.key.keysym.sym)
+        {
+        case SDLK_a:
+          camera_dx -= 0.01f;
+          break;
+        case SDLK_d:
+          camera_dx += 0.01f;
+          break;
+        case SDLK_w:
+          camera_dz -= 0.1f;
+          break;
+        case SDLK_s:
+          camera_dz += 0.1f;
+          break;
+        }
       }
     }
     const Uint8 *state = SDL_GetKeyboardState(NULL);
@@ -187,8 +209,8 @@ int main()
     model = glm::translate(model, glm::vec3(0, 0, -0.5f));
     model = glm::rotate(model, angle, glm::vec3(1, 1, 0));
     model = glm::translate(model, glm::vec3(0, 0, 0.5f));
-    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -2.0f));
-    glm::mat4 proj = glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 10.0f);
+    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(camera_dx, 0, camera_dz));
+    glm::mat4 proj = glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 20.0f);
 
     GLuint modelLoc = glGetUniformLocation(program, "uModel");
     GLuint viewLoc = glGetUniformLocation(program, "uView");
