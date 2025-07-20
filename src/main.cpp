@@ -7,6 +7,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "utils/readFile.h"
+#include "resources/vertices.h"
 
 int main()
 {
@@ -132,75 +133,29 @@ int main()
   // ------------------------------------ Event Init ------------------------------------
   glEnable(GL_DEPTH_TEST);
 
-  float vertices[] = {
-      // 앞면 (z = 0.0)
-      -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // v0
-      -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f,  // v2
-      0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,  // v4
+  extern float _vertices[];
+  extern const size_t _verticesCount;
 
-      -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // v2
-      0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f,  // v6
-      0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // v4
+  // auto vertices = _vertices;
+  const size_t verticesCount = _verticesCount;
 
-      // 뒷면 (z = -1.0)
-      0.5f, -0.5f, -1.0f, 0.0f, 1.0f, 0.0f,  // v5
-      0.5f, 0.5f, -1.0f, 0.0f, 1.0f, 0.0f,   // v7
-      -0.5f, -0.5f, -1.0f, 0.0f, 1.0f, 0.0f, // v1
-
-      0.5f, 0.5f, -1.0f, 0.0f, 1.0f, 0.0f,   // v7
-      -0.5f, 0.5f, -1.0f, 0.0f, 1.0f, 0.0f,  // v3
-      -0.5f, -0.5f, -1.0f, 0.0f, 1.0f, 0.0f, // v1
-
-      // 왼쪽면
-      -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 1.0f, // v1
-      -0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 1.0f,  // v3
-      -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,  // v0
-
-      -0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 1.0f, // v3
-      -0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f,  // v2
-      -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, // v0
-
-      // 오른쪽면
-      0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f,  // v4
-      0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f,   // v6
-      0.5f, -0.5f, -1.0f, 1.0f, 1.0f, 0.0f, // v5
-
-      0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f,   // v6
-      0.5f, 0.5f, -1.0f, 1.0f, 1.0f, 0.0f,  // v7
-      0.5f, -0.5f, -1.0f, 1.0f, 1.0f, 0.0f, // v5
-
-      // 윗면
-      -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f,  // v2
-      -0.5f, 0.5f, -1.0f, 1.0f, 0.0f, 1.0f, // v3
-      0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f,   // v6
-
-      -0.5f, 0.5f, -1.0f, 1.0f, 0.0f, 1.0f, // v3
-      0.5f, 0.5f, -1.0f, 1.0f, 0.0f, 1.0f,  // v7
-      0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f,   // v6
-
-      // 아랫면
-      -0.5f, -0.5f, -1.0f, 0.0f, 1.0f, 1.0f, // v1
-      -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f,  // v0
-      0.5f, -0.5f, -1.0f, 0.0f, 1.0f, 1.0f,  // v5
-
-      -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f, // v0
-      0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f,  // v4
-      0.5f, -0.5f, -1.0f, 0.0f, 1.0f, 1.0f  // v5
-  };
-
-  GLuint VBO, VAO;
+  GLuint VBO,
+      VAO;
   glGenVertexArrays(1, &VAO);
   glGenBuffers(1, &VBO);
 
   glBindVertexArray(VAO);
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, verticesCount * sizeof(float), _vertices, GL_STATIC_DRAW);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
 
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
+
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *)(6 * sizeof(float)));
+  glEnableVertexAttribArray(2);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
@@ -241,6 +196,14 @@ int main()
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
+
+    GLuint lightPosLoc = glGetUniformLocation(program, "uLightPos");
+    GLuint lightColorLoc = glGetUniformLocation(program, "uLightColor");
+    GLuint viewPosLoc = glGetUniformLocation(program, "uViewPos");
+
+    glUniform3f(lightPosLoc, 3.0f, 3.0f, 3.0f);
+    glUniform3f(lightColorLoc, 1.0f, 1.0f, 1.0f);
+    glUniform3f(viewPosLoc, 0.0f, 0.0f, 2.0f);
 
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
