@@ -10,6 +10,10 @@ uniform vec3 uLightPos;
 uniform vec3 uLightColor;
 uniform vec3 uViewPos;
 
+uniform float uAmbientStrength;
+uniform vec3 uAmbientColor;
+uniform float uSpecStrength;
+
 void main()
 {
     vec3 viewDir = normalize(uViewPos - vFragPos);
@@ -18,12 +22,12 @@ void main()
     vec3 normal = normalize(vNormal);
     vec3 reflectDir = reflect(-lightDir, normal);
 
-    vec3 ambient = 0.1 * uLightColor;
+    vec3 ambient = uAmbientStrength * uAmbientColor;
 
     float diff = max(dot(normal, lightDir), 0.0);
     vec3 diffuse = diff * uLightColor;
 
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 256.0);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), uSpecStrength);
     vec3 specular = spec * uLightColor;
 
     vec3 result = (ambient + diffuse + specular) * vColor;

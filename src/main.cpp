@@ -219,9 +219,17 @@ int main()
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
 
+    GLuint uAmbientColor = glGetUniformLocation(program, "uAmbientColor");
+    GLuint uAmbientStrength = glGetUniformLocation(program, "uAmbientStrength");
+    GLuint uSpecStrength = glGetUniformLocation(program, "uSpecStrength");
+
     GLuint lightPosLoc = glGetUniformLocation(program, "uLightPos");
     GLuint lightColorLoc = glGetUniformLocation(program, "uLightColor");
     GLuint viewPosLoc = glGetUniformLocation(program, "uViewPos");
+
+    glUniform3f(uAmbientColor, 1.0f, 0.0f, 0.0f);
+    glUniform1f(uAmbientStrength, 0.1f);
+    glUniform1f(uSpecStrength, 256.0f);
 
     glUniform3f(lightPosLoc, 3.0f, 3.0f, 3.0f);
     glUniform3f(lightColorLoc, 1.0f, 1.0f, 1.0f);
