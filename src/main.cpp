@@ -9,6 +9,11 @@
 #include "utils/readFile.h"
 #include "resources/vertices.h"
 
+#ifndef STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb/stb_image.h"
+#endif
+
 int main()
 {
   // ------------------------------------ SDL Setting ------------------------------------
@@ -148,14 +153,17 @@ int main()
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   glBufferData(GL_ARRAY_BUFFER, verticesCount * sizeof(float), _vertices, GL_STATIC_DRAW);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
 
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *)(3 * sizeof(float)));
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void *)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
 
-  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *)(6 * sizeof(float)));
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void *)(6 * sizeof(float)));
   glEnableVertexAttribArray(2);
+
+  glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void *)(9 * sizeof(float)));
+  glEnableVertexAttribArray(3);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
@@ -164,6 +172,38 @@ int main()
   float camera_dx = 0.0f;
   // float camera_dy = 0.0f;
   float camera_dz = -2.0f;
+
+  //  ------------------------------------ Init Texture ------------------------------------
+
+  int image_px = 0;
+  int image_py = 0;
+  int image_pc = 4;
+  const unsigned char *buf = stbi_load("../src/resources/textures/image.png", &image_px, &image_py, &image_pc, 0);
+  if (!buf)
+  {
+    std::cerr << "failed to load image file! : " << stbi_failure_reason() << std::endl;
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteProgram(program);
+    SDL_GL_DeleteContext(glContext);
+    SDL_DestroyWindow(svectoraWindow);
+    SDL_Quit();
+  }
+  GLuint textureID;
+  glGenTextures(1, &textureID);
+  glBindTexture(GL_TEXTURE_2D, textureID);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+  GLenum image_format = (image_pc == 3) ? GL_RGB : GL_RGBA;
+
+  glTexImage2D(GL_TEXTURE_2D, 0, image_format, image_px, image_py, 0, image_format, GL_UNSIGNED_BYTE, buf);
+  glGenerateMipmap(GL_TEXTURE_2D);
+
+  stbi_image_free((void *)buf);
 
   // ------------------------------------ Event Loop ------------------------------------
   SDL_Event event;
@@ -203,7 +243,6 @@ int main()
     }
 
     float angle = (float)SDL_GetTicks() / 1000.0f;
-    std::cout << "angle : " << angle << '\n';
 
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0, 0, -0.5f));
