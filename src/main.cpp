@@ -94,7 +94,7 @@ int main()
     return -1;
   }
 
-  std::string fragmentShaderSrc = readFile("../src/shaders/basic.frag");
+  std::string fragmentShaderSrc = readFile("../src/shaders/pbr.frag");
   if (fragmentShaderSrc == "")
   {
     std::cerr << "failed to read GLAD fragment shader file!" << std::endl;
@@ -207,6 +207,18 @@ int main()
   stbi_image_free((void *)buf);
 
   // ------------------------------------ Uniform settings ------------------------------------
+  GLuint modelLoc = glGetUniformLocation(program, "uModel");
+  GLuint viewLoc = glGetUniformLocation(program, "uView");
+  GLuint projLoc = glGetUniformLocation(program, "uProj");
+
+  GLuint uAmbientColor = glGetUniformLocation(program, "uAmbientColor");
+  GLuint uAmbientStrength = glGetUniformLocation(program, "uAmbientStrength");
+  // GLuint uSpecStrength = glGetUniformLocation(program, "uSpecStrength");
+
+  GLuint lightPosLoc = glGetUniformLocation(program, "uLightPos");
+  GLuint lightColorLoc = glGetUniformLocation(program, "uLightColor");
+  GLuint viewPosLoc = glGetUniformLocation(program, "uViewPos");
+
   GLint textureLoc = glGetUniformLocation(program, "uTexture");
   glUniform1i(textureLoc, 0);
 
@@ -215,7 +227,7 @@ int main()
   GLint ksLoc = glGetUniformLocation(program, "uK_s");
   GLint f0Loc = glGetUniformLocation(program, "uF0");
 
-  glUniform1f(roughnessLoc, 0.5f);
+  glUniform1f(roughnessLoc, 0.9f);
   glUniform1f(kdLoc, 1.0f);
   glUniform1f(ksLoc, 1.0f);
   glUniform3f(f0Loc, 0.04f, 0.04f, 0.04f);
@@ -266,20 +278,9 @@ int main()
     glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(camera_dx, 0, camera_dz));
     glm::mat4 proj = glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 20.0f);
 
-    GLuint modelLoc = glGetUniformLocation(program, "uModel");
-    GLuint viewLoc = glGetUniformLocation(program, "uView");
-    GLuint projLoc = glGetUniformLocation(program, "uProj");
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
-
-    GLuint uAmbientColor = glGetUniformLocation(program, "uAmbientColor");
-    GLuint uAmbientStrength = glGetUniformLocation(program, "uAmbientStrength");
-    // GLuint uSpecStrength = glGetUniformLocation(program, "uSpecStrength");
-
-    GLuint lightPosLoc = glGetUniformLocation(program, "uLightPos");
-    GLuint lightColorLoc = glGetUniformLocation(program, "uLightColor");
-    GLuint viewPosLoc = glGetUniformLocation(program, "uViewPos");
 
     glUniform3f(uAmbientColor, 1.0f, 0.0f, 0.0f);
     glUniform1f(uAmbientStrength, 0.1f);
@@ -293,6 +294,8 @@ int main()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glBindVertexArray(VAO);
 
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textureID);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     glBindVertexArray(0);
