@@ -191,11 +191,12 @@ int main()
   }
   GLuint textureID;
   glGenTextures(1, &textureID);
+  glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, textureID);
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
   GLenum image_format = (image_pc == 3) ? GL_RGB : GL_RGBA;
@@ -204,6 +205,20 @@ int main()
   glGenerateMipmap(GL_TEXTURE_2D);
 
   stbi_image_free((void *)buf);
+
+  // ------------------------------------ Uniform settings ------------------------------------
+  GLint textureLoc = glGetUniformLocation(program, "uTexture");
+  glUniform1i(textureLoc, 0);
+
+  GLint roughnessLoc = glGetUniformLocation(program, "uRoughness");
+  GLint kdLoc = glGetUniformLocation(program, "uK_d");
+  GLint ksLoc = glGetUniformLocation(program, "uK_s");
+  GLint f0Loc = glGetUniformLocation(program, "uF0");
+
+  glUniform1f(roughnessLoc, 0.5f);
+  glUniform1f(kdLoc, 1.0f);
+  glUniform1f(ksLoc, 1.0f);
+  glUniform3f(f0Loc, 0.04f, 0.04f, 0.04f);
 
   // ------------------------------------ Event Loop ------------------------------------
   SDL_Event event;
@@ -260,7 +275,7 @@ int main()
 
     GLuint uAmbientColor = glGetUniformLocation(program, "uAmbientColor");
     GLuint uAmbientStrength = glGetUniformLocation(program, "uAmbientStrength");
-    GLuint uSpecStrength = glGetUniformLocation(program, "uSpecStrength");
+    // GLuint uSpecStrength = glGetUniformLocation(program, "uSpecStrength");
 
     GLuint lightPosLoc = glGetUniformLocation(program, "uLightPos");
     GLuint lightColorLoc = glGetUniformLocation(program, "uLightColor");
@@ -268,7 +283,7 @@ int main()
 
     glUniform3f(uAmbientColor, 1.0f, 0.0f, 0.0f);
     glUniform1f(uAmbientStrength, 0.1f);
-    glUniform1f(uSpecStrength, 256.0f);
+    // glUniform1f(uSpecStrength, 256.0f);
 
     glUniform3f(lightPosLoc, 3.0f, 3.0f, 3.0f);
     glUniform3f(lightColorLoc, 1.0f, 1.0f, 1.0f);
